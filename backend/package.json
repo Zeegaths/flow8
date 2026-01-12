@@ -13,6 +13,7 @@
     "mnee",
     "bitcoin"
   ],
+  
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -25,7 +26,12 @@
     "sequelize": "^6.37.7"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.0.6",
+    "nodemon": "^3.1.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   },
   "description": "Flow8 Backend API - Milestone-based escrow with MNEE and PostgreSQL"
 }

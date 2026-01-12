@@ -1,12 +1,12 @@
-# Flow8 🚀
+# Flow8 
 
 Milestone-based escrow platform for freelancers and clients, powered by blockchain and AI verification.
 
-## 🎯 What is Flow8?
+## What is Flow8?
 
 Flow8 eliminates payment disputes in the gig economy by using smart contracts to hold funds in escrow and AI to verify milestone completion. When milestones are verified, payments release automatically—no delays, no disputes.
 
-## ✨ Features
+## Features
 
 - **Smart Contract Escrow**: Secure fund holding with automated release
 - **Bitcoin Wallet Integration**: Connect with Leather, Xverse, or UniSat
@@ -15,7 +15,7 @@ Flow8 eliminates payment disputes in the gig economy by using smart contracts to
 - **AI Verification**: (Coming soon) Automated deliverable checking
 - **Transparent**: All transactions on-chain and auditable
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 - **Frontend**: React + TypeScript + Vite
 - **Styling**: Tailwind CSS

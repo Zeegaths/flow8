@@ -1,34 +1,25 @@
 // Project & Milestone Types
 export interface Project {
   id: string;
-  clientAddress: string;
-  freelancerAddress: string;
   title: string;
   description: string;
-  totalAmount: number; // in MNEE
-  status: 'pending' | 'active' | 'completed' | 'disputed' | 'cancelled';
+  clientAddress: string;
+  freelancerAddress: string;
+  totalAmount: number;
+  status: 'active' | 'completed' | 'disputed';
+  createdAt: number;
   milestones: Milestone[];
-  escrowTxId?: string; // Transaction where total funds are locked
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface Milestone {
   id: string;
-  projectId: string;
   title: string;
   description: string;
-  amount: number; // in MNEE
-  deliverables: Deliverable[];
-  status: 'pending' | 'in_progress' | 'submitted' | 'under_review' | 'verified' | 'paid' | 'disputed';
-  dueDate?: Date;
-  submittedAt?: Date;
-  verifiedAt?: Date;
-  paidAt?: Date;
-  releaseTxId?: string; // Transaction where funds are released
-  verificationMethod: 'ai' | 'validator' | 'client';
-  validatorAddress?: string;
-  validatorFee?: number;
+  amount: number;
+  status: 'pending' | 'in-progress' | 'completed' | 'verified';
+  dueDate?: number;
+  completedAt?: number;
+  deliverableUrl?: string;
 }
 
 export interface Deliverable {

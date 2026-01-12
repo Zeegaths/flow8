@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { backendService } from '../services/BackendService';
 import { aiVerificationService } from '../services/AIVerificationService';
-import type { Project, Milestone, Deliverable } from '../types/index.ts';
+import type { Project, Milestone } from '../types/index.ts';
 import {
     ArrowLeft,
     CheckCircle,
@@ -29,7 +29,7 @@ export default function ProjectDetail({ projectId, onNavigate }: ProjectDetailPr
     const [showSubmitModal, setShowSubmitModal] = useState(false);
     const [verifying, setVerifying] = useState(false);
     const [verificationResult, setVerificationResult] = useState<any>(null);
-    const [error, setError] = useState<string | null>(null);
+
 
 
     // Submission form state
@@ -128,6 +128,7 @@ export default function ProjectDetail({ projectId, onNavigate }: ProjectDetailPr
                     setSelectedMilestone(null);
                 }, 3000);
             }
+            
         } catch (error) {
             console.error('Verification failed:', error);
             setError('Verification failed. Please try again.');

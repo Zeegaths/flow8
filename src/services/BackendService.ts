@@ -14,7 +14,7 @@ export class BackendService {
     }
   }
 
-  async getProject(projectId: string) {
+  async getProject(_projectId: string) {
     try {
       const response = await fetch(`${BACKEND_URL}/api/projects/${projectId}`);
       const data = await response.json();

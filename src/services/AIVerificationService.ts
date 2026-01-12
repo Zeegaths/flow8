@@ -157,7 +157,7 @@ Respond ONLY in this JSON format:
               !hasUrls && 'Consider adding links to deliverables',
               !hasProof && 'Add proof of work (commits, screenshots, etc.)',
               !allHaveDescriptions && 'Complete all deliverable descriptions',
-            ].filter(Boolean) as string[]
+            ].filter((issue): issue is string => typeof issue === 'string')
           : [],
     };
   }

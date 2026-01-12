@@ -29,6 +29,8 @@ export default function ProjectDetail({ projectId, onNavigate }: ProjectDetailPr
     const [showSubmitModal, setShowSubmitModal] = useState(false);
     const [verifying, setVerifying] = useState(false);
     const [verificationResult, setVerificationResult] = useState<any>(null);
+    const [error, setError] = useState<string | null>(null);  
+
 
 
 

@@ -1,37 +1,33 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { Project, Milestone } from '../types/index';
-import { MNEEService } from './MNEEService';
+import { mneeService } from './MNEEService';
 
 export class ProjectService {
-  private mneeService: MNEEService;
+  // Use the instance directly or as a type
   private projects: Map<string, Project> = new Map();
-
-  constructor(mneeService: MNEEService) {
-    this.mneeService = mneeService;
-  }
 
   async createProject(
     clientAddress: string,
     freelancerAddress: string,
-    milestones: Omit<Milestone, 'id' | 'projectId' | 'status' | 'verificationMethod'>[]
+    milestones: Omit<Milestone, 'id' | 'projectId' | 'status' | 'verificationMethod'>[],
+    title: string,
+    description: string
   ): Promise<Project> {
     const projectId = uuidv4();
     const totalAmount = milestones.reduce((sum, m) => sum + m.amount, 0);
 
-    // Validate client has sufficient balance
-    const hasFunds = await this.mneeService.validateSufficientBalance(
-      clientAddress,
-      totalAmount
-    );
+    // FIX: Updated to use balanceFormatted check (since validateSufficientBalance doesn't exist)
+    const balanceData = await mneeService.getBalance(clientAddress);
+    const hasFunds = parseFloat(balanceData.balanceFormatted) >= totalAmount;
 
     if (!hasFunds) {
-      throw new Error('Insufficient funds in client address');
+      throw new Error(`Insufficient funds. Need ${totalAmount} MNEE.`);
     }
 
     const project: Project = {
       id: projectId,
-      title: '', 
-      description: '', 
+      title, 
+      description, 
       clientAddress,
       freelancerAddress,
       totalAmount,
@@ -45,15 +41,16 @@ export class ProjectService {
             m.deliverables?.map(d => d.url || d.title) || []
         ),
       })),
-      createdAt: new Date().getTime(),
-      updatedAt: new Date().getTime(),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     };
 
     this.projects.set(projectId, project);
     return project;
   }
 
-  async lockProjectFunds(projectId: string, clientWif: string, escrowAddress: string) {
+  // FIX: Removed clientWif. Privy handles signing via the browser provider.
+  async lockProjectFunds(projectId: string, escrowAddress: string) {
     const project = this.projects.get(projectId);
     if (!project) throw new Error('Project not found');
 
@@ -61,24 +58,28 @@ export class ProjectService {
       throw new Error('Project is not in pending status');
     }
 
-    // Lock total project funds in escrow
-    const txId = await this.mneeService.lockFundsInEscrow(
-      clientWif,
+    // FIX: lockInEscrow returns TransactionResult { hash, confirmed, ... }
+    const result = await mneeService.lockInEscrow(
       escrowAddress,
-      project.totalAmount
+      project.totalAmount.toString(),
+      projectId
     );
 
-    project.status = 'active';
-    project.updatedAt = new Date().getTime();
+    if (!result.confirmed) {
+      throw new Error('Blockchain transaction failed to confirm');
+    }
 
-    // Mark first milestone as in_progress
+    project.status = 'active';
+    project.updatedAt = Date.now();
+
+    // Mark first milestone as in-progress
     if (project.milestones.length > 0) {
       project.milestones[0].status = 'in-progress';
-      project.milestones[0].escrowTxId = txId;
+      project.milestones[0].escrowTxId = result.hash; // txId is result.hash in Ethers
     }
 
     this.projects.set(projectId, project);
-    return { projectId, txId };
+    return { projectId, txId: result.hash };
   }
 
   getProject(projectId: string): Project | undefined {
@@ -86,10 +87,13 @@ export class ProjectService {
   }
 
   private determineVerificationMethod(deliverables: string[]): 'ai' | 'validator' | 'client' {
-    // Simple logic - can be enhanced
-    if (deliverables.some((d) => d.includes('github') || d.includes('code'))) {
-      return 'ai'; // Code can be auto-verified
+    const codeKeywords = ['github', 'gitlab', 'code', 'repository', 'pr'];
+    if (deliverables.some((d) => codeKeywords.some(kw => d.toLowerCase().includes(kw)))) {
+      return 'ai';
     }
-    return 'validator'; // Complex work needs human review
+    return 'validator';
   }
 }
+
+// Export the instance
+export const projectService = new ProjectService();

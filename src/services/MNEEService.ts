@@ -1,161 +1,160 @@
-import Mnee from '@mnee/ts-sdk';
+import { ethers } from 'ethers';
+import { walletService } from './WalletService';
 
-export class MNEEService {
-  private mnee: Mnee;
-  private config: any;
+const MNEE_CONTRACT_ADDRESS = '0x8ccedbAe4916b79da7F3F612EfB2EB93A2bFD6cF';
 
-  constructor() {
-    const environment = import.meta.env.VITE_MNEE_ENVIRONMENT || 'sandbox';
-    const apiKey = import.meta.env.VITE_MNEE_API_KEY || '';
+const MNEE_ABI = [
+  'function name() view returns (string)',
+  'function symbol() view returns (string)',
+  'function decimals() view returns (uint8)',
+  'function totalSupply() view returns (uint256)',
+  'function balanceOf(address account) view returns (uint256)',
+  'function allowance(address owner, address spender) view returns (uint256)',
+  'function transfer(address to, uint256 amount) returns (bool)',
+  'function approve(address spender, uint256 amount) returns (bool)',
+  'function transferFrom(address from, address to, uint256 amount) returns (bool)',
+  'event Transfer(address indexed from, address indexed to, uint256 value)',
+  'event Approval(address indexed owner, address indexed spender, uint256 value)'
+];
 
-    // Validate environment
-    if (environment !== 'sandbox' && environment !== 'production') {
-      throw new Error('Invalid MNEE environment. Check your .env file');
+export interface MNEEBalance {
+  balance: string;
+  balanceFormatted: string;
+  decimals: number;
+}
+
+export interface TransactionResult {
+  hash: string;
+  confirmed: boolean;
+  blockNumber?: number;
+}
+
+class MNEEService {
+  // Use a helper to always get a fresh, resolved contract instance
+  private async getContract(): Promise<ethers.Contract> {
+    const provider = walletService.getProvider();
+    // CRITICAL FIX: We must await the signer here
+    const signer = await walletService.getSigner(); 
+
+    if (!provider) {
+      throw new Error('Wallet not connected. Please connect your wallet first.');
     }
 
-    console.log('Initializing MNEE with environment:', environment);
-
-    // Use proxy for development
-    const baseUrl = import.meta.env.DEV 
-      ? 'http://localhost:5173/api'  // Use Vite proxy in dev
-      : undefined; // Use default in production
-
-    this.mnee = new Mnee({
-      environment: environment as 'sandbox' | 'production',
-      apiKey: apiKey,
-      ...(baseUrl && { baseUrl }) // Only add baseUrl if it exists
-    });
-  }
-
-  async initialize() {
-    try {
-      this.config = await this.mnee.config();
-      console.log('MNEE Service initialized:', this.config);
-      return this.config;
-    } catch (error) {
-      console.error('Failed to initialize MNEE:', error);
-      throw error;
-    }
-  }
-
-  // Check balance for an address
-  async getBalance(address: string) {
-    const balance = await this.mnee.balance(address);
-    return balance;
-  }
-
-  // Lock funds in escrow (send from client to escrow address)
-  async lockFundsInEscrow(clientWif: string, escrowAddress: string, amount: number) {
-    try {
-      const response = await this.mnee.transfer(
-        [{ address: escrowAddress, amount }],
-        clientWif
-      );
-
-      console.log(`Funds locked in escrow. Ticket: ${response.ticketId}`);
-
-      // Wait for confirmation
-      const status = await this.waitForConfirmation(response.ticketId!);
-      return status.tx_id;
-    } catch (error: any) {
-      throw new Error(`Failed to lock funds: ${error.message}`);
-    }
-  }
-
-  // Release funds from escrow to freelancer
-  async releaseFunds(
-    escrowWif: string,
-    freelancerAddress: string,
-    amount: number,
-    callbackUrl?: string
-  ) {
-    try {
-      const response = await this.mnee.transfer(
-        [{ address: freelancerAddress, amount }],
-        escrowWif,
-        { broadcast: true, callbackUrl }
-      );
-
-      console.log(`Funds released. Ticket: ${response.ticketId}`);
-
-      // Wait for confirmation
-      const status = await this.waitForConfirmation(response.ticketId!);
-      return status.tx_id;
-    } catch (error: any) {
-      throw new Error(`Failed to release funds: ${error.message}`);
-    }
-  }
-
-  // Create multi-output transaction (for splitting payments)
-  async splitPayment(escrowWif: string, recipients: { address: string; amount: number }[]) {
-    try {
-      const response = await this.mnee.transfer(recipients, escrowWif);
-
-      console.log(`Payment split. Ticket: ${response.ticketId}`);
-
-      // Wait for confirmation
-      const status = await this.waitForConfirmation(response.ticketId!);
-      return status.tx_id;
-    } catch (error: any) {
-      throw new Error(`Failed to split payment: ${error.message}`);
-    }
-  }
-
-  // Get UTXOs for an address (to track escrow funds)
-  async getUTXOs(address: string) {
-    try {
-      const utxos = await this.mnee.getUtxos(address, 0, 100);
-      return utxos;
-    } catch (error: any) {
-      throw new Error(`Failed to get UTXOs: ${error.message}`);
-    }
-  }
-
-  // Wait for transaction confirmation
-  private async waitForConfirmation(ticketId: string, maxAttempts = 30) {
-    let attempts = 0;
-
-    while (attempts < maxAttempts) {
-      const status = await this.mnee.getTxStatus(ticketId);
-
-      if (status.status === 'SUCCESS' || status.status === 'MINED') {
-        return status;
-      }
-
-      if (status.status === 'FAILED') {
-        throw new Error(`Transaction failed: ${status.errors}`);
-      }
-
-      // Wait 2 seconds before checking again
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      attempts++;
-    }
-
-    throw new Error('Transaction confirmation timeout');
-  }
-
-  // Validate sufficient balance
-  async validateSufficientBalance(address: string, requiredAmount: number): Promise<boolean> {
-    const balance = await this.getBalance(address);
-    return balance.decimalAmount >= requiredAmount;
-  }
-
-  // Calculate fees for a transaction
-  calculateFees(amount: number): number {
-    const atomicAmount = this.mnee.toAtomicAmount(amount);
-    const feeTier = this.config.fees.find(
-      (tier: any) => atomicAmount >= tier.min && atomicAmount <= tier.max
+    // Pass the resolved signer (or provider) to the contract
+    return new ethers.Contract(
+      MNEE_CONTRACT_ADDRESS,
+      MNEE_ABI,
+      signer || provider
     );
-
-    if (feeTier) {
-      return this.mnee.fromAtomicAmount(feeTier.fee);
-    }
-
-    return 0;
   }
 
-  // Get MNEE instance for direct access
-  getMNEE() {
-    return this.mnee;
+  async getTokenInfo(): Promise<{
+    name: string;
+    symbol: string;
+    decimals: number;
+    totalSupply: string;
+  }> {
+    try {
+      const contract = await this.getContract(); // Added await
+      const [name, symbol, decimals, totalSupply] = await Promise.all([
+        contract.name(),
+        contract.symbol(),
+        contract.decimals(),
+        contract.totalSupply()
+      ]);
+
+      return {
+        name,
+        symbol,
+        decimals: Number(decimals),
+        totalSupply: ethers.formatUnits(totalSupply, decimals)
+      };
+    } catch (error: any) {
+      console.error('Error getting token info:', error);
+      throw new Error('Failed to get MNEE token information');
+    }
+  }
+
+  async getBalance(address?: string): Promise<MNEEBalance> {
+    try {
+      const contract = await this.getContract(); // Added await
+      const wallet = walletService.getWallet();
+      
+      const addr = address || wallet?.address;
+      if (!addr) throw new Error('No address provided');
+
+      const [balance, decimals] = await Promise.all([
+        contract.balanceOf(addr),
+        contract.decimals()
+      ]);
+
+      return {
+        balance: balance.toString(),
+        balanceFormatted: ethers.formatUnits(balance, decimals),
+        decimals: Number(decimals)
+      };
+    } catch (error: any) {
+      console.error('Error getting MNEE balance:', error);
+      throw new Error('Failed to get MNEE balance');
+    }
+  }
+
+  async transfer(to: string, amount: string): Promise<TransactionResult> {
+    try {
+      const contract = await this.getContract(); // Added await
+      const decimals = await contract.decimals();
+      const amountInUnits = ethers.parseUnits(amount, decimals);
+
+      const tx = await contract.transfer(to, amountInUnits);
+      const receipt = await tx.wait();
+
+      return {
+        hash: tx.hash,
+        confirmed: true,
+        blockNumber: receipt.blockNumber
+      };
+    } catch (error: any) {
+      if (error.code === 'ACTION_REJECTED') throw new Error('Transaction rejected');
+      throw new Error(error.message || 'Transfer failed');
+    }
+  }
+
+  async approve(spender: string, amount: string): Promise<TransactionResult> {
+    try {
+      const contract = await this.getContract(); // Added await
+      const decimals = await contract.decimals();
+      const amountInUnits = ethers.parseUnits(amount, decimals);
+
+      const tx = await contract.approve(spender, amountInUnits);
+      const receipt = await tx.wait();
+
+      return {
+        hash: tx.hash,
+        confirmed: true,
+        blockNumber: receipt.blockNumber
+      };
+    } catch (error: any) {
+      throw new Error(error.message || 'Approval failed');
+    }
+  }
+
+  // Helper for the escrow flow
+  async lockInEscrow(
+    escrowAddress: string,
+    amount: string,
+    projectId: string
+  ): Promise<TransactionResult> {
+    try {
+      // Step 1: Client grants Escrow permission to take MNEE
+      await this.approve(escrowAddress, amount);
+      
+      // Step 2: In a real app, you'd call a specific Escrow contract function
+      // For now, we simulate the lock by transferring to the escrow address
+      return await this.transfer(escrowAddress, amount);
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to lock funds');
+    }
   }
 }
+
+export const mneeService = new MNEEService();

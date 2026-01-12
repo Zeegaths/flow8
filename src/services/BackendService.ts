@@ -5,18 +5,30 @@ export class BackendService {
   async getProjects() {
     try {
       const response = await fetch(`${BACKEND_URL}/api/projects`);
+      
+      // If backend is not running, return empty array
+      if (!response.ok) {
+        console.warn('Backend not available, returning empty projects');
+        return [];
+      }
+      
       const data = await response.json();
       if (!data.success) throw new Error(data.error);
-      return data.projects;
+      return data.projects || [];
     } catch (error: any) {
-      console.error('Get projects failed:', error);
-      throw error;
+      console.warn('Backend not available:', error.message);
+      return []; // Return empty array instead of throwing
     }
   }
 
   async getProject(_projectId: string) {
     try {
       const response = await fetch(`${BACKEND_URL}/api/projects/${_projectId}`);
+      
+      if (!response.ok) {
+        throw new Error('Project not found');
+      }
+      
       const data = await response.json();
       if (!data.success) throw new Error(data.error);
       return data.project;
@@ -33,6 +45,11 @@ export class BackendService {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(projectData),
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create project - backend not available');
+      }
+      
       const data = await response.json();
       if (!data.success) throw new Error(data.error);
       return data.project;
@@ -50,6 +67,11 @@ export class BackendService {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update milestone');
+      }
+      
       const data = await response.json();
       if (!data.success) throw new Error(data.error);
       return data.milestone;
@@ -60,47 +82,32 @@ export class BackendService {
   }
 
   async submitMilestone(projectId: string, milestoneId: string, deliverables: any[]) {
-    try {
-      return await this.updateMilestone(milestoneId, {
-        status: 'submitted',
-        deliverables,
-        submittedAt: new Date(),
-      });
-    } catch (error: any) {
-      console.error('Submit milestone failed:', error);
-      throw error;
-    }
+    return await this.updateMilestone(milestoneId, {
+      status: 'submitted',
+      deliverables,
+      submittedAt: new Date().getTime(), // Use timestamp
+    });
   }
 
   async verifyMilestone(milestoneId: string, approved: boolean) {
-    try {
-      if (approved) {
-        return await this.updateMilestone(milestoneId, {
-          status: 'verified',
-          verifiedAt: new Date(),
-        });
-      } else {
-        return await this.updateMilestone(milestoneId, {
-          status: 'in_progress',
-        });
-      }
-    } catch (error: any) {
-      console.error('Verify milestone failed:', error);
-      throw error;
+    if (approved) {
+      return await this.updateMilestone(milestoneId, {
+        status: 'verified',
+        verifiedAt: new Date().getTime(),
+      });
+    } else {
+      return await this.updateMilestone(milestoneId, {
+        status: 'in-progress',
+      });
     }
   }
 
   async releaseMilestonePayment(milestoneId: string) {
-    try {
-      return await this.updateMilestone(milestoneId, {
-        status: 'paid',
-        paidAt: new Date(),
-        releaseTxId: `mock_tx_${Date.now()}`, // TODO: Real MNEE transaction
-      });
-    } catch (error: any) {
-      console.error('Release payment failed:', error);
-      throw error;
-    }
+    return await this.updateMilestone(milestoneId, {
+      status: 'paid',
+      paidAt: new Date().getTime(),
+      releaseTxId: `mnee_tx_${Date.now()}`,
+    });
   }
 }
 

@@ -334,7 +334,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       <AdvancedBackground />
 
       {/* Navigation */}
-      <Navbar />
+      <Navbar onNavigate={onNavigate} currentPage="landing" />
 
       {/* Hero Section */}
       <section className="relative z-10 pt-32 pb-40 px-4 sm:px-6 lg:px-8 overflow-hidden">

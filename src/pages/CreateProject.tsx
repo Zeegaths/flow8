@@ -107,7 +107,8 @@ export default function CreateProject({ onNavigate }: CreateProjectProps) {
       const result = await mneeService.lockInEscrow(
         ESCROW_CONTRACT_ADDRESS,
         totalAmount.toString(),
-        createdProject.id
+        createdProject.id,
+        freelancerAddress
       );
 
       if (result.confirmed) {

@@ -62,7 +62,8 @@ export class ProjectService {
     const result = await mneeService.lockInEscrow(
       escrowAddress,
       project.totalAmount.toString(),
-      projectId
+      projectId,
+      project.freelancerAddress
     );
 
     if (!result.confirmed) {

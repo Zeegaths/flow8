@@ -16,12 +16,13 @@ function App() {
   useEffect(() => {
     const wallet = walletService.getWallet();
     if (wallet && wallet.connected) {
-      setCurrentPage('dashboard');
+      setCurrentPage('dashboard' as Page);
+
     }
   }, []);
 
-  const handleNavigate = (page: Page, projectId?: string) => {
-    setCurrentPage(page);
+  const handleNavigate = (page: Page | string, projectId?: string) => {
+    setCurrentPage('dashboard' as Page);
     if (projectId) setSelectedProjectId(projectId);
   };
 

@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Project, Milestone } from '../types';
+import type { Project, Milestone } from '../types/index';
 import { MNEEService } from './MNEEService';
 
 export class ProjectService {
@@ -30,6 +30,8 @@ export class ProjectService {
 
     const project: Project = {
       id: projectId,
+      title: '', 
+      description: '', 
       clientAddress,
       freelancerAddress,
       totalAmount,
@@ -39,10 +41,12 @@ export class ProjectService {
         id: uuidv4(),
         projectId,
         status: 'pending',
-        verificationMethod: this.determineVerificationMethod(m.deliverables),
+        verificationMethod: this.determineVerificationMethod(
+            m.deliverables?.map(d => d.url || d.title) || []
+        ),
       })),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().getTime(),
+      updatedAt: new Date().getTime(),
     };
 
     this.projects.set(projectId, project);
@@ -65,11 +69,11 @@ export class ProjectService {
     );
 
     project.status = 'active';
-    project.updatedAt = new Date();
+    project.updatedAt = new Date().getTime();
 
     // Mark first milestone as in_progress
     if (project.milestones.length > 0) {
-      project.milestones[0].status = 'in_progress';
+      project.milestones[0].status = 'in-progress';
       project.milestones[0].escrowTxId = txId;
     }
 

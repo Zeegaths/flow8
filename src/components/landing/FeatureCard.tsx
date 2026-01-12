@@ -1,5 +1,6 @@
-import { LucideProps } from "lucide-react";
-import React, { ForwardRefExoticComponent, RefAttributes } from "react";
+import React from "react";
+import type { ForwardRefExoticComponent, RefAttributes } from "react";
+import type { LucideProps } from "lucide-react";
 
 type FeatureCardProps = {
   title: string;

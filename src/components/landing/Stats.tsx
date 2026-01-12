@@ -1,4 +1,4 @@
-import CountUp from "./../../blocks/TextAnimations/CountUp/CountUp";
+// import CountUp from "./../../blocks/TextAnimations/CountUp/CountUp";
 
 const stats = [
   { number: 10000, label: "Active Freelancers", suffix: "+", prefix: "" },
@@ -23,14 +23,7 @@ function Stats() {
               >
                 <div className="flex items-center gap-1">
                   {stat.prefix}
-                  <CountUp
-                    from={0}
-                    to={stat.number}
-                    separator=","
-                    direction="up"
-                    duration={3}
-                    className="count-up-text font-info font-semibold text-3xl"
-                  />
+                <span className="text-4xl font-bold">1234</span>
                   {stat.suffix}
                 </div>
                 <div className="text-gray-500 text-sm">{stat.label}</div>

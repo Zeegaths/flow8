@@ -15,6 +15,8 @@ import {
     FileText,
     X,
     Plus,
+    Eye,  
+    AlertTriangle,     
 } from 'lucide-react';
 
 interface ProjectDetailProps {
@@ -420,14 +422,15 @@ function MilestoneCard({
     onSubmit: (milestone: Milestone) => void;
 }) {
     const statusConfig = {
-        pending: { color: 'bg-gray-500/20 text-gray-400', icon: Clock },
-        in_progress: { color: 'bg-blue-500/20 text-blue-400', icon: Clock },
-        submitted: { color: 'bg-yellow-500/20 text-yellow-400', icon: Upload },
-        under_review: { color: 'bg-orange-500/20 text-orange-400', icon: Sparkles },
-        verified: { color: 'bg-green-500/20 text-green-400', icon: CheckCircle },
-        paid: { color: 'bg-green-500/20 text-green-400', icon: CheckCircle },
-        disputed: { color: 'bg-red-500/20 text-red-400', icon: AlertCircle },
-    };
+  pending: { color: 'bg-gray-500/20 text-gray-400', icon: Clock },
+  'in-progress': { color: 'bg-blue-500/20 text-blue-400', icon: Clock },
+  submitted: { color: 'bg-yellow-500/20 text-yellow-400', icon: Upload },
+  under_review: { color: 'bg-orange-500/20 text-orange-400', icon: Eye },
+  verified: { color: 'bg-green-500/20 text-green-400', icon: CheckCircle },
+  completed: { color: 'bg-emerald-500/20 text-emerald-400', icon: CheckCircle },  // ADD THIS
+  paid: { color: 'bg-purple-500/20 text-purple-400', icon: DollarSign },
+  disputed: { color: 'bg-red-500/20 text-red-400', icon: AlertTriangle }
+};
 
     const config = statusConfig[milestone.status];
     const StatusIcon = config.icon;
@@ -460,7 +463,7 @@ function MilestoneCard({
                     </div>
                 </div>
 
-                {milestone.status === 'in_progress' && (
+                {milestone.status === 'in-progress' && (
                     <button
                         onClick={() => onSubmit(milestone)}
                         className="bg-gradient-to-r from-purple-500 to-violet-500 text-white px-6 py-3 rounded-xl font-bold hover:scale-105 transition-all flex items-center gap-2"

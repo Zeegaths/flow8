@@ -1,15 +1,11 @@
 import {
   Award,
-  Bitcoin,
-  Check,
+  Bitcoin,  
   CheckSquare,
   Shield,
   Smartphone,
   Users,
 } from "lucide-react";
-import ScrollStack, {
-  ScrollStackItem,
-} from "../../blocks/Components/ScrollStack/ScrollStack";
 import React, { useState } from "react";
 import FeatureCard from "./FeatureCard";
 import btcInvoice from "../../assets/images/btc-invoice.png";

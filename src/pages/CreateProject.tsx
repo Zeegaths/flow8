@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { backendService } from '../services/BackendService';
 import { walletService } from '../services/WalletService';
-import type { Milestone, Deliverable } from '../types';
+// import type { Milestone, Deliverable } from '../types/index.ts';
 import {
   ArrowLeft,
   Plus,

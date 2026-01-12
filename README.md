@@ -1,73 +1,128 @@
-# React + TypeScript + Vite
+# Flow8 🚀
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Milestone-based escrow platform for freelancers and clients, powered by blockchain and AI verification.
 
-Currently, two official plugins are available:
+## 🎯 What is Flow8?
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Flow8 eliminates payment disputes in the gig economy by using smart contracts to hold funds in escrow and AI to verify milestone completion. When milestones are verified, payments release automatically—no delays, no disputes.
 
-## React Compiler
+## ✨ Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Smart Contract Escrow**: Secure fund holding with automated release
+- **Bitcoin Wallet Integration**: Connect with Leather, Xverse, or UniSat
+- **Milestone Tracking**: Break projects into verifiable milestones
+- **MNEE Stablecoin**: Stable payments without crypto volatility
+- **AI Verification**: (Coming soon) Automated deliverable checking
+- **Transparent**: All transactions on-chain and auditable
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Frontend**: React + TypeScript + Vite
+- **Styling**: Tailwind CSS
+- **Blockchain**: Bitcoin (via Stacks)
+- **Wallets**: Leather, Xverse, UniSat
+- **Payments**: MNEE Stablecoin
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🚀 Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Prerequisites
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- Node.js 18+
+- A Bitcoin wallet (Leather, Xverse, or UniSat)
+
+### Installation
+```bash
+# Clone the repository
+git clone https://github.com/Zeegaths/Flow8.git
+cd Flow8
+
+# Install dependencies
+npm install
+
+# Create environment file
+cp .env.example .env
+# Edit .env with your configuration
+
+# Start development server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Visit `http://localhost:5173`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 📁 Project Structure
 ```
+Flow8/
+├── src/
+│   ├── components/       # React components
+│   │   ├── layout/       # Navbar, Footer, etc.
+│   │   └── pages/        # Page components
+│   ├── services/         # Blockchain & API services
+│   │   ├── WalletService.ts
+│   │   ├── MNEEService.ts
+│   │   └── BackendService.ts
+│   └── App.tsx
+├── .env.example          # Environment template
+└── package.json
+```
+
+## 🔧 Configuration
+
+Copy `.env.example` to `.env` and configure:
+```bash
+VITE_NETWORK=testnet
+VITE_MNEE_CONTRACT_ADDRESS=your_contract_here
+VITE_ESCROW_CONTRACT_ADDRESS=your_contract_here
+VITE_RPC_ENDPOINT=your_rpc_endpoint
+```
+
+## 🎮 Usage
+
+1. **Connect Wallet**: Click "Connect Wallet" and choose your Bitcoin wallet
+2. **Create Project**: Set up project with milestones and payment amounts
+3. **Deposit Funds**: Client deposits MNEE to escrow contract
+4. **Complete Milestones**: Freelancer submits deliverables
+5. **Verify & Release**: AI verifies, funds auto-release to freelancer
+
+## 🚧 Roadmap
+
+- [ ] Complete MNEE stablecoin integration
+- [ ] Implement AI verification system
+- [ ] Add dispute resolution mechanism
+- [ ] Multi-chain support (Ethereum, Polygon)
+- [ ] Mobile app (iOS/Android)
+- [ ] Integration with Upwork/Fiverr
+
+## 🤝 Contributing
+
+Contributions welcome! Please:
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📝 License
+
+MIT License - see [LICENSE](LICENSE) file
+
+
+## 👥 Team
+
+**Zee** - Founder & Lead Developer
+- [GitHub](https://github.com/Zeegaths)
+- [Twitter/X](https://x.com/gathoni_zarah)
+
+## 🏆 Hackathon
+
+Built for the MNEE Hackathon - Programmable Money for Agents, Commerce, and Automated Finance
+
+## 📧 Contact
+
+Questions? Reach out:
+- Email: zarahgathoni76@gmail.com
+- Discord: .gathoni
+
+---
+
+Built with 💜 for the future of freelance payments
